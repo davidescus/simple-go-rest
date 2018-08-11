@@ -11,10 +11,10 @@ import (
 const serverPort = 8282
 
 type User struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Age   int    `json:"age"`
-	Gene  string `json:"gene"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Age    int    `json:"age"`
+	Gender string `json:"gender"`
 }
 
 func getAllUsers(w http.ResponseWriter, r *http.Request) {
