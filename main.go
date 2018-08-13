@@ -1,37 +1,25 @@
 package main
 
 import (
+	"net/http"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
+	"simple-go-rest/customer"
 )
 
 const serverPort = 8282
 
-type User struct {
-	Name   string `json:"name"`
-	Email  string `json:"email"`
-	Age    int    `json:"age"`
-	Gender string `json:"gender"`
+type response struct {
+	HasError bool        `json:"hasError"`
+	Message  string      `json:"message"`
+	Data     interface{} `json:"data"`
 }
 
-func getAllUsers(w http.ResponseWriter, r *http.Request) {
-
-	var users []User
-
-	user1 := User{"John doe", "john.doe@Email.com", 33, "male"}
-	user2 := User{"Hilary clinton", "hilary.clinton@Email.com", 41, "female"}
-	user3 := User{"Jessica Jameson", "jessica.jameson@Email.com", 19, "female"}
-	user4 := User{"Derek Bananas", "derek.bananas@Email.com", 52, "male"}
-
-	users = append(users, user1)
-	users = append(users, user2)
-	users = append(users, user3)
-	users = append(users, user4)
-
-	data, err := json.Marshal(users)
+func getAllCustomers(w http.ResponseWriter, r *http.Request) {
+	records := customer.GetAll()
+	data, err := json.Marshal(records)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -41,9 +29,36 @@ func getAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func storeUser(w http.ResponseWriter, r *http.Request) {
+	response := response{}
+    c := customer.Customer{}
+    data, err := c.Store(r)
+	if err != nil {
+		response.HasError = true
+		response.Message = err.Error()
+	}
+
+    response.Data = data
+
+	jsonData, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write(jsonData)
+}
+
 func main() {
 	fmt.Printf("WebServer start on: %d port\n", serverPort)
 
-	http.HandleFunc("/user/all", getAllUsers)
+	// Get all customers
+	http.HandleFunc("/customer/all", getAllCustomers)
+
+	// Store new customer
+	http.HandleFunc("/customer/store", storeUser)
+
+	// Start server and log fatal err
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(serverPort), nil))
 }
