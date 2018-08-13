@@ -1,9 +1,10 @@
 # Simple rest application
 
-####Instalation:  
+##How to install:  
 go get github.com/davidescus/simple-go-rest
 
-###localhost:8282/
+##How it works:  
+localhost:8282/
 ```
    /customers/all
    GET
