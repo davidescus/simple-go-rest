@@ -1,11 +1,10 @@
 package customer
 
 import (
-	"strconv"
-	"net/http"
+		"net/http"
 	"simple-go-rest/persistence"
 	"log"
-	"errors"
+	"simple-go-rest/messages"
 )
 
 // Customer ...
@@ -18,48 +17,9 @@ type Customer struct {
 }
 
 // Store ...
-func (c *Customer) Store(r *http.Request) (*Customer, error) {
-	r.ParseForm()
-	var message string
-
-	c.Name = r.FormValue("name")
-	message += ValidateName(c.Name)
-
-	c.Email = r.FormValue("email")
-	message += ValidateEmail(c.Email)
-
-	age, err := strconv.ParseUint(r.FormValue("age"), 10, 64)
-	if err != nil {
-		message += "Please provide a valid age"
-	}
-	c.Age = age
-	message += ValidateAge(c.Age)
-
-	c.Gender = r.FormValue("gender")
-	message += ValidateGender(c.Gender)
-
-	if message != "" {
-		return nil, errors.New(message)
-	}
-
-	storage := persistence.Connect()
-	defer storage.Close()
-
-	query := "INSERT INTO customers (Name, Email, Age, Gender) VALUES (?, ?, ?, ?)"
-	stmt, _ := storage.Prepare(query)
-	res, err := stmt.Exec(c.Name, c.Email, c.Age, c.Gender)
-	if err != nil {
-		message += "Error when try to insert... Sorry!"
-		return nil, errors.New(message)
-	}
-
-	lastId, _ := res.LastInsertId()
-	c.Id = lastId
-
-	return c, nil
+func (c *Customer) Store(r *http.Request) (*Customer, messages.Messages) {
+    return storeNewCustomer(r, c)
 }
-
-type Customers []Customer
 
 // GetAll ...
 func GetAll() []Customer {

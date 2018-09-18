@@ -1,28 +1,30 @@
 package customer
 
-func ValidateName(name string) string {
+import "errors"
+
+func validateName(name string) error {
 	if name == "" {
-		return "Name can not be empty\n"
+		return errors.New("name can not be empty")
 	}
-	return ""
+	return nil
 }
 
-func ValidateEmail(email string) string {
+func validateEmail(email string) error {
 	if email == "" {
-		return "Email can not be empty"
+		return errors.New("email can not be empty")
 	}
-	return ""
+	return nil
 }
 
-func ValidateAge(age uint64) string {
+func validateAge(age uint64) error {
 	if age < 1 {
-		return "Age can not be less than 1"
+		return errors.New("age can not be less than 1")
 	}
-	return ""
+	return nil
 }
-func ValidateGender(gender string) string {
+func validateGender(gender string) error {
 	if gender == "male" || gender == "female" {
-		return ""
+		return nil
 	}
-	return "Gender can be 'male' or 'female'"
+	return errors.New("gender can be 'male' or 'female'")
 }
