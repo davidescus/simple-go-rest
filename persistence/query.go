@@ -4,7 +4,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"database/sql"
-)
+	)
 
 // Connect ...
 func Connect() *sql.DB {

@@ -22,12 +22,18 @@ func (c *Customer) Store(r *http.Request) (*Customer, messages.Messages) {
 }
 
 // GetAll ...
-func GetAll() []Customer {
+func GetAll() ([]Customer, messages.Messages) {
 	storage := persistence.Connect()
 	defer storage.Close()
 
+	messageCollection := &messages.Messages{}
+
 	query := "SELECT * FROM customers"
-	rows, _ := storage.Query(query)
+	rows, err := storage.Query(query)
+	if err != nil {
+		messageCollection.AddError("error When try to parse request", "system")
+		return nil, messageCollection.Get()
+	}
 
 	customers := make([]Customer, 0)
 
@@ -40,5 +46,5 @@ func GetAll() []Customer {
 		customers = append(customers, *c)
 	}
 
-	return customers
+	return customers, messageCollection.Get()
 }

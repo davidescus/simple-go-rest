@@ -3,6 +3,12 @@ package messages
 // Messages represent a collection of Message
 type Messages []Message
 
+type Messenger interface {
+	Get() Messages
+	GetCount() int
+	AddError(string, string)
+}
+
 // Message it is a simple structure that keep error message info
 type Message struct {
 	Type  string

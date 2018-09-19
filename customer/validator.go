@@ -1,30 +1,37 @@
 package customer
 
-import "errors"
+import (
+	"simple-go-rest/messages"
+)
 
-func validateName(name string) error {
+var messenger messages.Messenger
+
+// SetMessenger ...
+func SetMessenger(m messages.Messenger) {
+	messenger = m
+}
+
+func validateName(name string) {
 	if name == "" {
-		return errors.New("name can not be empty")
+		messenger.AddError("name can not be empty", "name")
 	}
-	return nil
 }
 
-func validateEmail(email string) error {
+func validateEmail(email string) {
 	if email == "" {
-		return errors.New("email can not be empty")
+		messenger.AddError("email can not be empty", "email")
 	}
-	return nil
 }
 
-func validateAge(age uint64) error {
+func validateAge(age uint64) {
 	if age < 1 {
-		return errors.New("age can not be less than 1")
+		messenger.AddError("age can not be less than 1", "age")
 	}
-	return nil
 }
-func validateGender(gender string) error {
+func validateGender(gender string) {
 	if gender == "male" || gender == "female" {
-		return nil
+		return
 	}
-	return errors.New("gender can be 'male' or 'female'")
+
+	messenger.AddError("gender can be 'male' or 'female'", "gender")
 }

@@ -15,21 +15,30 @@ func HandleCustomerRoutes() {
 	http.HandleFunc("/customer/store", storeCustomer)
 }
 
-func getAllCustomers(w http.ResponseWriter, r *http.Request) {
-	records := customer.GetAll()
-	sendResponse(w, records)
-}
-
 type response struct {
 	HasError bool        `json:"hasError"`
 	Message  interface{} `json:"message"`
 	Data     interface{} `json:"data"`
 }
 
+func getAllCustomers(w http.ResponseWriter, r *http.Request) {
+	response := response{}
+	records, messageSlice := customer.GetAll()
+
+	if len(messageSlice) > 0 {
+		response.HasError = true
+	}
+
+	response.Message = messageSlice
+	response.Data = records
+	sendResponse(w, response)
+}
+
 func storeCustomer(w http.ResponseWriter, r *http.Request) {
 	response := response{}
 	c := customer.Customer{}
 	data, messageSlice := c.Store(r)
+
 	if len(messageSlice) > 0 {
 		response.HasError = true
 	}

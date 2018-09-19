@@ -5,47 +5,36 @@ import (
 	"strconv"
 	"net/http"
 	"simple-go-rest/persistence"
-)
+	)
 
 func storeNewCustomer(r *http.Request, c *Customer) (*Customer, messages.Messages) {
-	messageCollection := &messages.Messages{}
+	mess := &messages.Messages{}
+	SetMessenger(mess)
 
 	err := r.ParseForm()
 	if err != nil {
-		messageCollection.AddError("error When try to parse request", "system")
-		return nil, messageCollection.Get()
+		mess.AddError("error When try to parse request", "system")
+		return nil, mess.Get()
 	}
 
 	c.Name = r.FormValue("name")
-	err = validateName(c.Name)
-	if err != nil {
-		messageCollection.AddError(err.Error(), "name")
-	}
+	validateName(c.Name)
 
 	c.Email = r.FormValue("email")
-	err = validateEmail(c.Email)
-	if err != nil {
-		messageCollection.AddError(err.Error(), "email")
-	}
+	validateEmail(c.Email)
 
 	age, _ := strconv.ParseUint(r.FormValue("age"), 10, 64)
 	if err != nil {
-		messageCollection.AddError("invalid age", "age")
+		mess.AddError("invalid age", "age")
 	}
 	c.Age = age
-	err = validateAge(c.Age)
-	if err != nil {
-		messageCollection.AddError(err.Error(), "age")
-	}
+	validateAge(c.Age)
 
 	c.Gender = r.FormValue("gender")
-	err = validateGender(c.Gender)
-	if err != nil {
-		messageCollection.AddError(err.Error(), "gender")
-	}
+	validateGender(c.Gender)
 
-	if messageCollection.GetCount() > 0 {
-		return nil, messageCollection.Get()
+	if mess.GetCount() > 0 {
+		return nil, mess.Get()
 	}
 
 	storage := persistence.Connect()
@@ -55,12 +44,12 @@ func storeNewCustomer(r *http.Request, c *Customer) (*Customer, messages.Message
 	stmt, _ := storage.Prepare(query)
 	res, err := stmt.Exec(c.Name, c.Email, c.Age, c.Gender)
 	if err != nil {
-		messageCollection.AddError("error when try to insert... Sorry", "system")
-		return nil, messageCollection.Get()
+		mess.AddError("error when try to insert... Sorry", "system")
+		return nil, mess.Get()
 	}
 
 	lastId, _ := res.LastInsertId()
 	c.Id = lastId
 
-	return c, messageCollection.Get()
+	return c, mess.Get()
 }
