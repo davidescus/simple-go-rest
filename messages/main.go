@@ -1,5 +1,7 @@
 package messages
 
+import "fmt"
+
 // Messages represent a collection of Message
 type Messages []Message
 
@@ -27,10 +29,18 @@ func (m Messages) GetCount() int {
 }
 
 // AddError will create Message structure and it into Messages collection
-func (m *Messages) AddError(v, n string) {
-	msg := Message{}
-	msg.Type = "error"
-	msg.Name = n
-	msg.Value = v
-	*m = append(*m, msg)
+func (m *Messages) AddError(name, value string) {
+
+	fmt.Println("here")
+
+	if value != "" {
+
+		fmt.Println(name + " " + value)
+
+		msg := Message{}
+		msg.Type = "error"
+		msg.Name = name
+		msg.Value = value
+		*m = append(*m, msg)
+	}
 }

@@ -2,17 +2,17 @@ package routes
 
 import (
 	"net/http"
-	"simple-go-rest/customer"
 	"encoding/json"
 	"log"
-	)
+	"simple-go-rest/customer"
+)
 
 func HandleCustomerRoutes() {
 	// Get all customers
-	http.HandleFunc("/customer/all", getAllCustomers)
+	http.HandleFunc("/customer/all", getAll)
 
 	// Store new customer
-	http.HandleFunc("/customer/store", storeCustomer)
+	http.HandleFunc("/customer/store", store)
 }
 
 type response struct {
@@ -21,23 +21,22 @@ type response struct {
 	Data     interface{} `json:"data"`
 }
 
-func getAllCustomers(w http.ResponseWriter, r *http.Request) {
+func getAll(w http.ResponseWriter, r *http.Request) {
 	response := response{}
 	records, messageSlice := customer.GetAll()
 
-	if len(messageSlice) > 0 {
-		response.HasError = true
-	}
+	//if len(messageSlice) > 0 {
+	//	response.HasError = true
+	//}
 
 	response.Message = messageSlice
 	response.Data = records
 	sendResponse(w, response)
 }
 
-func storeCustomer(w http.ResponseWriter, r *http.Request) {
+func store(w http.ResponseWriter, r *http.Request) {
 	response := response{}
-	c := customer.Customer{}
-	data, messageSlice := c.Store(r)
+	data, messageSlice := customer.Store(r)
 
 	if len(messageSlice) > 0 {
 		response.HasError = true

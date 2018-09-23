@@ -1,50 +1,64 @@
 package customer
 
 import (
-		"net/http"
-	"simple-go-rest/persistence"
-	"log"
 	"simple-go-rest/messages"
+	"strconv"
+	"net/http"
 )
 
-// Customer ...
-type Customer struct {
-	Id     int64
-	Name   string
-	Email  string
-	Age    uint64
-	Gender string
-}
-
 // Store ...
-func (c *Customer) Store(r *http.Request) (*Customer, messages.Messages) {
-    return storeNewCustomer(r, c)
+func Store(r *http.Request) (*Customer, messages.Messages) {
+	msgr := &messages.Messages{}
+	c := Customer{}
+
+	err := r.ParseForm()
+	if err != nil {
+		msgr.AddError("error When try to parse request", "system")
+		return nil, msgr.Get()
+	}
+
+	c.Name = r.FormValue("name")
+	msgr.AddError("name", validateName(c.Name))
+
+	c.Email = r.FormValue("email")
+	msgr.AddError("email", validateEmail(c.Email))
+
+	age, _ := strconv.ParseUint(r.FormValue("age"), 10, 64)
+	if err != nil {
+		msgr.AddError("age", "invalid age")
+	}
+	c.Age = age
+	msgr.AddError("age", validateAge(c.Age))
+
+	c.Gender = r.FormValue("gender")
+	msgr.AddError("gender", validateGender(c.Gender))
+
+	if msgr.GetCount() > 0 {
+		return nil, msgr.Get()
+	}
+
+	err = c.Store()
+	if err != nil {
+		msgr.AddError("system", err.Error())
+	}
+
+	if msgr.GetCount() > 0 {
+		return nil, msgr.Get()
+	}
+
+	return &c, nil
 }
 
 // GetAll ...
-func GetAll() ([]Customer, messages.Messages) {
-	storage := persistence.Connect()
-	defer storage.Close()
+func GetAll() (*Customers, messages.Messages) {
+	msgr := &messages.Messages{}
+	c := Customers{}
 
-	messageCollection := &messages.Messages{}
-
-	query := "SELECT * FROM customers"
-	rows, err := storage.Query(query)
+	customers, err := c.All()
 	if err != nil {
-		messageCollection.AddError("error When try to parse request", "system")
-		return nil, messageCollection.Get()
+		msgr.AddError("system", err.Error())
+		return customers, msgr.Get()
 	}
 
-	customers := make([]Customer, 0)
-
-	for rows.Next() {
-		c := &Customer{}
-		err :=rows.Scan(&c.Id, &c.Name, &c.Email, &c.Age, &c.Gender)
-		if err != nil {
-			log.Fatal(err)
-		}
-		customers = append(customers, *c)
-	}
-
-	return customers, messageCollection.Get()
+	return customers, nil
 }
